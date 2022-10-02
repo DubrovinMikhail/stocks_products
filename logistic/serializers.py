@@ -6,7 +6,7 @@ from logistic.models import Product, StockProduct, Stock
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['title', 'description']
+        fields = ['id', 'title', 'description']
 
 
 class ProductPositionSerializer(serializers.ModelSerializer):
@@ -33,6 +33,9 @@ class StockSerializer(serializers.ModelSerializer):
         positions = validated_data.pop('positions')
         stock = super().update(instance, validated_data)
         for position in positions:
-            StockProduct.objects.update_or_create(stock=stock, **position)
-
+            StockProduct.objects.update_or_create(
+                stock=stock,
+                product=position['product'],
+                defaults={'price': position['price'], 'quantity': position['quantity']},
+                )
         return stock
